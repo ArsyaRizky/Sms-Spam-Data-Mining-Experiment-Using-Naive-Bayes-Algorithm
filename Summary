@@ -1,0 +1,18 @@
+Summary dari apa yang saya pelajari dari materi sblm UTS adalah :
+
+ 1. Library Python
+Terdapat beberapa library dalam bahasa pemrograman python contoh nya pandas, numpy, dan matplotlib. Dimana pandas digunakan untuk  memuat, membersihkan, dan memanipulasi data dalam format tabular (DataFrame).
+Sebagai contoh yaitu pd.read_csv() untuk memanggil atau membaca dataset berupa file berbentuk csv. Matplotlib sendiri digunakan untuk membuat visualisasi data. Sedangkan numpy digunakan untuk operasi matematika dan statistik
+
+ 2. Preprocessing Data
+Sebelum data digunakan untuk pelatihan model, perlu dilakukan pembersihan berupa Case folding yaitu untuk mengubah semua huruf menjadi huruf kecil (lower()). Pembersihan karakter untuk menghapus angka, tanda baca, dan simbol (re.sub()).
+Tokenisasi untuk memecah teks menjadi kata-kata. Stopwords removal untk menghapus kata-kata umum yang tidak bermakna (seperti "the", "is").
+
+ 3. Algoritma Klasifikasi
+Ada beberapa algoritma klasifikasi yang dipelajari selama pertemuan dikelas diantara nya Algoritma Naives Bayes yang cocok untuk teks dan data kategori menggunakan prinsip probabilitas dan Algortima Decision Tree untuk Membuat pohon keputusan berdasarkan fitur data
+dan mudah diinterpretasikan tetapi Cenderung overfitting pada data kecil jika tidak diatur maksimal depth-nya.
+
+4. evaluasi model 
+Evaluasi model diantaranya terdapat confusion matrix untuk perbandingan prediksi versuss aktual.
+Accuracy, Precision, Recall, F1-Score merupakan metode untuk mengukur performa klasifikasi.
+Cross-validation untuk mengukur konsistensi model dengan data uji berbeda (misalnya 5-fold).
