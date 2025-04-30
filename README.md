@@ -1,7 +1,7 @@
 # Eksperimen Naive Bayes untuk Klasifikasi SMS Spam
 Proyek ini merupakan bagian dari Ujian Tengah Semester yang bertujuan untuk menerapkan algoritma Naive Bayes dalam mengklasifikasikan pesan SMS sebagai Spam atau Ham (bukan spam). Dataset yang digunakan adalah koleksi pesan SMS dalam Bahasa Inggris yang sudah diberi label, dan berasal dari dataset publik SMS Spam Collection.
 
-✨ ##Tujuan Proyek
+## ✨Tujuan Proyek
 Melakukan eksplorasi data terhadap pesan-pesan SMS.
 
 Melakukan pembersihan dan preprocessing teks seperti case-folding, penghapusan tanda baca, stemming, dan stopword removal.
@@ -14,12 +14,12 @@ Mengevaluasi model dengan akurasi, confusion matrix, dan cross-validation.
 
 Menyediakan visualisasi data (WordCloud, distribusi panjang pesan, dan lainnya) untuk membantu pemahaman.
 
-📁 ##Isi Proyek
+## 📁Isi Proyek
 eksperimen_naive_bayes_sms.ipynb: Notebook utama yang berisi seluruh eksperimen dan penjelasan dalam Bahasa Indonesia.
 
 smspam.csv: Dataset pesan SMS yang sudah dilabeli.
 
-🧪 ##Metodologi
+## 🧪Metodologi
 Eksplorasi Data
 Menampilkan distribusi label, panjang pesan, dan frekuensi kata.
 
@@ -32,10 +32,10 @@ Konversi teks ke bentuk numerik menggunakan TF-IDF.
 Training dan Evaluasi Model
 Pelatihan model Naive Bayes dan evaluasi menggunakan akurasi, confusion matrix, dan validasi silang.
 
-📈 ##Hasil Sementara
+## 📈Hasil Sementara
 Model MultinomialNB menghasilkan akurasi yang tinggi untuk mendeteksi spam, dengan performa yang cukup konsisten saat diuji menggunakan cross-validation.
 
-👩‍💻 ##Teknologi yang Digunakan
+## 👩‍💻Teknologi yang Digunakan
 Python
 
 Scikit-learn
