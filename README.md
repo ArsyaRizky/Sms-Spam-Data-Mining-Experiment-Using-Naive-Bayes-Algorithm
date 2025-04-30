@@ -46,5 +46,5 @@ WordCloud
 
 NLTK
 
-🧑‍🏫 #Catatan
+## 🧑‍🏫Catatan
 Proyek ini dikerjakan sebagai tugas UTS untuk mata kuliah Data Mining dan difokuskan pada penerapan pembelajaran mesin untuk klasifikasi teks.
