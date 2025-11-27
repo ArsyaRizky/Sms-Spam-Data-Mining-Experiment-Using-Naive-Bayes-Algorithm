@@ -97,15 +97,47 @@ class USBCamera(CameraInterface):
     def start(self):
         import cv2
         self.cv2 = cv2
-        self.cap = cv2.VideoCapture(self.camera_index)
+        
+        # Try different backends for better Raspberry Pi compatibility
+        backends = [
+            (cv2.CAP_V4L2, "V4L2"),
+            (cv2.CAP_ANY, "ANY"),
+            (cv2.CAP_GSTREAMER, "GSTREAMER"),
+        ]
+        
+        for backend, name in backends:
+            logger.info(f"Trying {name} backend...")
+            self.cap = cv2.VideoCapture(self.camera_index, backend)
+            
+            if self.cap.isOpened():
+                # Test if we can actually read a frame
+                ret, test_frame = self.cap.read()
+                if ret and test_frame is not None:
+                    logger.info(f"✅ {name} backend works!")
+                    break
+                else:
+                    logger.warning(f"{name} backend opened but can't read frames")
+                    self.cap.release()
+            else:
+                logger.warning(f"{name} backend failed to open")
         
         if not self.cap.isOpened():
-            raise Exception("Failed to open USB camera")
+            raise Exception("Failed to open USB camera with any backend")
         
-        # Set camera properties
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-        self.cap.set(cv2.CAP_PROP_FPS, 30)
+        # Set camera properties (some may not work on all cameras)
+        try:
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            self.cap.set(cv2.CAP_PROP_FPS, 30)
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        except Exception as e:
+            logger.warning(f"Could not set some camera properties: {e}")
+        
+        # Warm up camera
+        logger.info("Warming up camera...")
+        for _ in range(5):
+            self.cap.read()
+            time.sleep(0.1)
         
         logger.info("✅ USB camera initialized")
     
@@ -271,6 +303,8 @@ class HeadlessScanner:
         
         self.running = True
         frame_count = 0
+        failed_frames = 0
+        max_consecutive_failures = 10
         
         try:
             while self.running:
@@ -278,10 +312,16 @@ class HeadlessScanner:
                 ret, frame = self.camera.read()
                 
                 if not ret or frame is None:
-                    logger.error("Failed to grab frame")
-                    time.sleep(0.1)
+                    failed_frames += 1
+                    if failed_frames >= max_consecutive_failures:
+                        logger.error(f"Failed to grab {max_consecutive_failures} consecutive frames. Camera may be disconnected.")
+                        break
+                    logger.warning(f"Failed to grab frame ({failed_frames}/{max_consecutive_failures})")
+                    time.sleep(0.5)
                     continue
                 
+                # Reset failure counter on successful frame
+                failed_frames = 0
                 frame_count += 1
                 
                 # Only log every 100 frames to reduce noise
@@ -355,29 +395,46 @@ class HeadlessScanner:
 def detect_camera_type() -> str:
     """Auto-detect available camera type"""
     
-    # Try Pi Camera first
+    # Try USB camera first (more common issue)
+    try:
+        import cv2
+        logger.info("Testing USB camera...")
+        
+        # Try different indices
+        for idx in range(3):
+            logger.info(f"  Trying /dev/video{idx}...")
+            cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
+            if cap.isOpened():
+                ret, frame = cap.read()
+                cap.release()
+                if ret and frame is not None:
+                    logger.info(f"🎥 Detected: USB Webcam at index {idx}")
+                    return "usb"
+                else:
+                    logger.warning(f"  Camera at index {idx} opened but can't read frames")
+            else:
+                logger.debug(f"  No camera at index {idx}")
+    except Exception as e:
+        logger.debug(f"USB camera detection error: {e}")
+    
+    # Try Pi Camera
     try:
         from picamera2 import Picamera2
+        logger.info("Testing Pi Camera Module...")
         # Try to initialize
         cam = Picamera2()
         cam.close()
         logger.info("🎥 Detected: Raspberry Pi Camera Module")
         return "picamera"
-    except:
-        pass
-    
-    # Try USB camera
-    try:
-        import cv2
-        cap = cv2.VideoCapture(0)
-        if cap.isOpened():
-            cap.release()
-            logger.info("🎥 Detected: USB Webcam")
-            return "usb"
-    except:
-        pass
+    except Exception as e:
+        logger.debug(f"Pi Camera detection error: {e}")
     
     logger.error("❌ No camera detected!")
+    logger.error("Troubleshooting steps:")
+    logger.error("  1. Check camera connection: ls -l /dev/video*")
+    logger.error("  2. Check USB devices: lsusb")
+    logger.error("  3. For Pi Camera: vcgencmd get_camera")
+    logger.error("  4. Try manual selection: --camera-type usb or --camera-type picamera")
     return None
 
 
