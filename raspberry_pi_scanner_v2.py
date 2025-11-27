@@ -395,7 +395,19 @@ class HeadlessScanner:
 def detect_camera_type() -> str:
     """Auto-detect available camera type"""
     
-    # Try USB camera first (more common issue)
+    # Try Pi Camera FIRST (priority for Raspberry Pi Camera Module)
+    try:
+        from picamera2 import Picamera2
+        logger.info("Testing Pi Camera Module...")
+        # Try to initialize
+        cam = Picamera2()
+        cam.close()
+        logger.info("🎥 Detected: Raspberry Pi Camera Module")
+        return "picamera"
+    except Exception as e:
+        logger.debug(f"Pi Camera detection error: {e}")
+    
+    # Try USB camera as fallback
     try:
         import cv2
         logger.info("Testing USB camera...")
@@ -417,24 +429,12 @@ def detect_camera_type() -> str:
     except Exception as e:
         logger.debug(f"USB camera detection error: {e}")
     
-    # Try Pi Camera
-    try:
-        from picamera2 import Picamera2
-        logger.info("Testing Pi Camera Module...")
-        # Try to initialize
-        cam = Picamera2()
-        cam.close()
-        logger.info("🎥 Detected: Raspberry Pi Camera Module")
-        return "picamera"
-    except Exception as e:
-        logger.debug(f"Pi Camera detection error: {e}")
-    
     logger.error("❌ No camera detected!")
     logger.error("Troubleshooting steps:")
-    logger.error("  1. Check camera connection: ls -l /dev/video*")
-    logger.error("  2. Check USB devices: lsusb")
-    logger.error("  3. For Pi Camera: vcgencmd get_camera")
-    logger.error("  4. Try manual selection: --camera-type usb or --camera-type picamera")
+    logger.error("  1. For Pi Camera: vcgencmd get_camera")
+    logger.error("  2. Install picamera2: sudo apt-get install -y python3-picamera2")
+    logger.error("  3. Check camera connection: ls -l /dev/video*")
+    logger.error("  4. Try manual selection: --camera-type picamera or --camera-type usb")
     return None
 
 
