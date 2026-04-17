@@ -1,0 +1,42 @@
+import time
+import board
+import busio
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
+from gpiozero import OutputDevice
+
+# --- Configuration ---
+DRY_THRESHOLD = 22000  # High = Dry, Low = Wet
+TEST_WATERING_TIME = 2 # Just run the pump for 2 seconds to test
+
+# --- Hardware Initialization ---
+print("--- Initializing Hardware Test ---")
+i2c = busio.I2C(board.SCL, board.SDA)
+ads = ADS.ADS1115(i2c)
+chan = AnalogIn(ads, ADS.P0)
+pump_relay = OutputDevice(17, active_high=False, initial_value=False)
+
+print("Setup Complete. Dip the sensor in water, then pull it out to test the pump.")
+print("Press Ctrl+C to stop.\n")
+
+try:
+    while True:
+        moisture = chan.value
+        print(f"Current Moisture Reading: {moisture}")
+        
+        if moisture > DRY_THRESHOLD:
+            print(">> STATUS: SOIL DRY! Triggering pump...")
+            pump_relay.on()
+            time.sleep(TEST_WATERING_TIME)
+            pump_relay.off()
+            print(">> Pump test complete. Waiting 5 seconds before next read to prevent flooding.\n")
+            time.sleep(5)
+        else:
+            print(">> STATUS: SOIL WET. No action needed.\n")
+            time.sleep(2)
+
+except KeyboardInterrupt:
+    print("\nHardware Test stopped by user.")
+finally:
+    pump_relay.off()
+    print("Relay safely turned off.")
